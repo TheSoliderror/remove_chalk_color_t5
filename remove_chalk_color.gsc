@@ -11,6 +11,8 @@ main()
 	replaceFunc( maps\_zombiemode::round_start, ::round_start_replace );
 	replaceFunc( maps\_zombiemode::create_chalk_hud, ::create_chalk_hud_replace );
 	replaceFunc( maps\_zombiemode::chalk_one_up, ::chalk_one_up_replace );
+	replaceFunc( maps\_zombiemode::chalk_round_over, ::chalk_round_over_replace );
+	
 	//level thread main_replace()
 }
 
@@ -293,4 +295,78 @@ chalk_one_up_replace()
 	{
 		level.chalk_override = undefined;
 	}
+}
+
+chalk_round_over_replace()
+{
+	huds = [];
+	huds[huds.size] = level.chalk_hud1;
+	huds[huds.size] = level.chalk_hud2;
+
+	if( level.round_number <= 5 || level.round_number > 10 )
+	{
+		level.chalk_hud2 SetText( " " );
+	}
+
+	time = level.zombie_vars["zombie_between_round_time"];
+	if ( time > 3 )
+	{
+		time = time - 2;	// add this deduction back in at the bottom
+	}
+
+	for( i = 0; i < huds.size; i++ )
+	{
+		if( IsDefined( huds[i] ) )
+		{
+			huds[i] FadeOverTime( time * 0.25 );
+			//huds[i].color = ( 1, 1, 1 );
+		}
+	}
+
+	// Pulse
+	fade_time = 0.5;
+	steps =  ( time * 0.5 ) / fade_time;
+	for( q = 0; q < steps; q++ )
+	{
+		for( i = 0; i < huds.size; i++ )
+		{
+			if( !IsDefined( huds[i] ) )
+			{
+				continue;
+			}
+
+			huds[i] FadeOverTime( fade_time );
+			huds[i].alpha = 0;
+		}
+
+		wait( fade_time );
+
+		for( i = 0; i < huds.size; i++ )
+		{
+			if( !IsDefined( huds[i] ) )
+			{
+				continue;
+			}
+
+			huds[i] FadeOverTime( fade_time );
+			huds[i].alpha = 1;		
+		}
+
+		wait( fade_time );
+	}
+
+	for( i = 0; i < huds.size; i++ )
+	{
+		if( !IsDefined( huds[i] ) )
+		{
+			continue;
+		}
+
+		huds[i] FadeOverTime( time * 0.25 );
+		//		huds[i].color = ( 0.8, 0, 0 );
+		//huds[i].color = ( 0.21, 0, 0 );
+		huds[i].alpha = 0;
+	}
+
+	wait ( 2.0 );
 }
